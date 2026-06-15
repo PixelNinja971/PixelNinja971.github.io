@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nathan Eliezer-Vanerot — Data Engineer</title>
+  <style>
+    :root {
+      --bg-from: #ffffff;
+      --bg-to: #f5f7ff;
+      --glass: rgba(255,255,255,0.7);
+      --glass-strong: rgba(255,255,255,0.92);
+      --glass-border: rgba(200,210,240,0.6);
+      --glass-shadow: rgba(0,0,0,0.05);
+      --accent: #3a5bd9;
+      --accent2: #2eb37c;
+      --accent-light: rgba(58,91,217,0.1);
+      --text: #1a1e2e;
+      --text2: #6b7490;
+      --text3: #9ba5c0;
+      --tag-bg: rgba(58,91,217,0.1);
+      --tag-text: #3a5bd9;
+      --divider: rgba(0,0,0,0.07);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #ffffff;
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Blobs de fond */
+    .bg-blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.45;
+    }
+    .blob1 { width: 600px; height: 600px; background: #dde8ff; top: -100px; left: -150px; }
+    .blob2 { width: 500px; height: 500px; background: #e8e0ff; top: 40%; right: -100px; }
+    .blob3 { width: 400px; height: 400px; background: #d5eeff; bottom: 0; left: 30%; }
+
+    /* GLASS MIXIN */
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 4px 30px var(--glass-shadow);
+      border-radius: 18px;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 16px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+      border-radius: 50px;
+      z-index: 100;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      gap: 2rem;
+      min-width: 600px;
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 0.95rem;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.25rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(58,91,217,0.1);
+      color: var(--accent);
+    }
+
+    /* LAYOUT */
+    .page { position: relative; z-index: 1; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 5rem;
+    }
+
+    .hero-inner { max-width: 700px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      padding: 0.4rem 1.1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent2);
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .hero-badge .dot {
+      width: 7px; height: 7px;
+      background: var(--accent2);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.05;
+      margin-bottom: 1.25rem;
+      color: var(--text);
+    }
+
+    .hero h1 .accent { color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text2);
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+      font-weight: 400;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 4rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(58,91,217,0.35);
+    }
+
+    .btn-primary:hover {
+      background: #2e4bc5;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(58,91,217,0.4);
+    }
+
+    .btn-glass {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255,255,255,0.85);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      padding: 0.6rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 5rem 2rem;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 0.6rem;
+    }
+
+    .section-desc {
+      color: var(--text2);
+      font-size: 0.95rem;
+      max-width: 560px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .about-text-card {
+      padding: 2rem;
+    }
+
+    .about-text-card p {
+      color: var(--text2);
+      margin-bottom: 1rem;
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    .about-text-card strong { color: var(--text); }
+
+    .about-info-card { padding: 1.25rem; }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.9rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+
+    .info-label {
+      font-size: 0.7rem;
+      color: var(--text3);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 0.1rem;
+    }
+
+    .info-value { font-size: 0.875rem; color: var(--text); font-weight: 500; }
+
+    /* PROJECTS */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .project-card {
+      padding: 1.75rem;
+      transition: all 0.25s;
+      cursor: default;
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+      background: var(--glass-strong);
+    }
+
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+
+    .project-icon { font-size: 1.8rem; }
+
+    .project-badge {
+      background: rgba(58,91,217,0.1);
+      color: var(--accent);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.25rem 0.7rem;
+      border-radius: 50px;
+      border: 1px solid rgba(58,91,217,0.2);
+    }
+
+    .project-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.3px;
+    }
+
+    .project-card p {
+      color: var(--text2);
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.65;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tag {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.08);
+      color: var(--text2);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.22rem 0.6rem;
+      border-radius: 50px;
+    }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: gap 0.2s;
+    }
+
+    .project-link:hover { gap: 0.7rem; }
+
+    /* SKILLS */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .skill-cat { padding: 1.5rem; }
+
+    .skill-cat h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--divider);
+      font-size: 0.875rem;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .skill-item:last-child { border-bottom: none; }
+
+    .skill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+    }
+
+    /* EXPERIENCE */
+    .timeline { padding-left: 1.75rem; position: relative; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 12px; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      opacity: 0.3;
+    }
+
+    .timeline-item { position: relative; padding-bottom: 2.5rem; }
+    .timeline-item:last-child { padding-bottom: 0; }
+
+    .timeline-dot {
+      position: absolute;
+      left: -1.75rem;
+      top: 8px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 3px rgba(58,91,217,0.15);
+      transform: translateX(-50%);
+    }
+
+    .timeline-date {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent2);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .timeline-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 0.15rem;
+    }
+
+    .timeline-company {
+      font-size: 0.85rem;
+      color: var(--text2);
+      margin-bottom: 0.85rem;
+    }
+
+    .timeline-desc { list-style: none; }
+
+    .timeline-desc li {
+      color: var(--text2);
+      font-size: 0.875rem;
+      padding: 0.2rem 0;
+      padding-left: 1rem;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .timeline-desc li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.75rem;
+    }
+
+    /* EDUCATION */
+    .edu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .edu-card { padding: 1.5rem; }
+
+    .edu-year {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.4rem;
+    }
+
+    .edu-degree {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      margin-bottom: 0.3rem;
+    }
+
+    .edu-school { font-size: 0.85rem; color: var(--text2); }
+
+    /* CONTACT */
+    .contact-card {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .contact-card h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 0.75rem;
+    }
+
+    .contact-card p { color: var(--text2); margin-bottom: 2.5rem; font-size: 0.95rem; }
+
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.85rem 1.5rem;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 340px;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+    }
+
+    .contact-link:hover {
+      background: rgba(255,255,255,0.85);
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .contact-link-icon { font-size: 1.1rem; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      color: var(--text3);
+      font-size: 0.8rem;
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--divider);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .about-grid { grid-template-columns: 1fr; }
+      nav { min-width: unset; width: calc(100% - 2rem); top: 10px; }
+      .nav-links { display: none; }
+      .contact-card { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Blobs de fond -->
+<div class="bg-blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<div class="page">
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Nathan E-V.</div>
+  <ul class="nav-links">
+    <li><a href="#about">Profil</a></li>
+    <li><a href="#projects">Projets</a></li>
+    <li><a href="#skills">Compétences</a></li>
+    <li><a href="#experience">Expériences</a></li>
+    <li><a href="#education">Formation</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Disponible en alternance — Sept. 2026
+    </div>
+    <h1>Nathan<br /><span class="accent">Eliezer-Vanerot</span></h1>
+    <p class="hero-sub">
+      Data Engineer en formation · Pipelines ETL · Python · SQL · Airflow · Docker<br />
+      Profil hybride : rigueur data + vision produit
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">Voir mes projets →</a>
+      <a href="https://github.com/PixelNinja971" target="_blank" class="btn btn-glass">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+        GitHub
+      </a>
+      <a href="#contact" class="btn btn-glass">Me contacter</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pill">
+        <span class="stat-num">3</span>
+        <span class="stat-label">Projets GitHub</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">3+</span>
+        <span class="stat-label">Ans d'expérience</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">6+</span>
+        <span class="stat-label">Technologies data</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-label">À propos</div>
+  <div class="section-title">Profil</div>
+  <div class="about-grid">
+    <div class="glass about-text-card">
+      <p>
+        Ancien <strong>Product Designer chez Natixis</strong>, je suis en reconversion vers le <strong>Data Engineering</strong>.
+        Cette transition n'est pas un hasard : pendant 3 ans, j'ai structuré l'information, analysé des KPIs
+        et collaboré avec des équipes tech — exactement ce que fait un Data Engineer.
+      </p>
+      <p>
+        Aujourd'hui, je construis des <strong>pipelines ETL</strong>, je travaille avec <strong>Python, SQL, Airflow et Docker</strong>,
+        et je développe des projets concrets visibles sur GitHub.
+      </p>
+      <p>
+        Mon profil hybride — <strong>rigueur data + vision métier + sensibilité produit</strong> — est ce qui me différencie.
+        Je prépare un <strong>titre RNCP 7 Data Engineer</strong> (Bac+5) en alternance, disponible dès <strong>septembre 2026</strong>.
+      </p>
+    </div>
+    <div class="glass about-info-card">
+      <div class="info-row">
+        <span class="info-icon">📍</span>
+        <div>
+          <span class="info-label">Localisation</span>
+          <span class="info-value">Paris, France</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📧</span>
+        <div>
+          <span class="info-label">Email</span>
+          <span class="info-value">eliezervanerot.nathan@gmail.com</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">📱</span>
+        <div>
+          <span class="info-label">Téléphone</span>
+          <span class="info-value">+33 6 46 48 64 46</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">🎓</span>
+        <div>
+          <span class="info-label">Formation</span>
+          <span class="info-value">Data Engineer RNCP 7 — en cours</span>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-icon">✅</span>
+        <div>
+          <span class="info-label">Disponibilité</span>
+          <span class="info-value">Alternance — Sept. 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">GitHub</div>
+  <div class="section-title">Projets Data</div>
+  <p class="section-desc">Projets concrets construits pour apprendre et démontrer mes compétences en data engineering.</p>
+  <div class="projects-grid">
+
+    <div class="glass project-card">
+      <div class="project-header">
+        <span class="project-icon">🚗</span>
+        <span class="project-badge">⭐ Projet phare</span>
+      </div>
+      <h3>Automotive Data Pipeline</h3>
+      <p>Pipeline ETL industriel complet : extraction CSV, transformation Pandas, chargement PostgreSQL, orchestration Airflow, dashboard Metabase — entièrement conteneurisé avec Docker.</p>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">Pandas</span>
+        <span class="tag">PostgreSQL</span>
+        <span class="tag">Airflow</span>
+        <span class="tag">Docker</span>
+        <span class="tag">Metabase</span>
+        <span class="tag">ETL</span>
+      </div>
+      <a href="https://github.com/PixelNinja971/automotive-data-pipeline" target="_blank" class="project-link">
+        Voir sur GitHub →
+      </a>
+    </div>
+
+    <div class="glass project-card">
+      <div class="project-header">
+        <span class="project-icon">🌦️</span>
+        <span class="project-badge">API · SQL</span>
+      </div>
+      <h3>Pipeline Météo</h3>
+      <p>Pipeline de collecte en temps réel depuis l'API OpenWeather. Extraction JSON, nettoyage et structuration des données, stockage SQLite via SQLAlchemy. Sécurité clé API avec dotenv.</p>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">REST API</span>
+        <span class="tag">SQLite</span>
+        <span class="tag">SQLAlchemy</span>
+        <span class="tag">ETL</span>
+      </div>
+      <a href="https://github.com/PixelNinja971/data-weather-project" target="_blank" class="project-link">
+        Voir sur GitHub →
+      </a>
+    </div>
+
+    <div class="glass project-card">
+      <div class="project-header">
+        <span class="project-icon">🎵</span>
+        <span class="project-badge">SQL · Analyse</span>
+      </div>
+      <h3>Chinook Music Store</h3>
+      <p>Pipeline d'analyse de données sur base relationnelle réelle. Requêtes SQL avancées (JOIN, GROUP BY, SUM), visualisation Matplotlib — top ventes, CA par pays, performance employés.</p>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">SQL</span>
+        <span class="tag">SQLite</span>
+        <span class="tag">Pandas</span>
+        <span class="tag">Matplotlib</span>
+      </div>
+      <a href="https://github.com/PixelNinja971/Chinook-Music-Store---Sales-Data-Analysis" target="_blank" class="project-link">
+        Voir sur GitHub →
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">Stack technique</div>
+  <div class="section-title">Compétences</div>
+  <p class="section-desc">Technologies maîtrisées dans le cadre de ma formation et de mes projets personnels.</p>
+  <div class="skills-grid">
+
+    <div class="glass skill-cat">
+      <h3>🐍 Langages</h3>
+      <div class="skill-item"><span class="skill-dot"></span>Python (Pandas, SQLAlchemy)</div>
+      <div class="skill-item"><span class="skill-dot"></span>SQL (PostgreSQL, SQLite)</div>
+    </div>
+
+    <div class="glass skill-cat">
+      <h3>🔄 Data Engineering</h3>
+      <div class="skill-item"><span class="skill-dot"></span>ETL / ELT Pipelines</div>
+      <div class="skill-item"><span class="skill-dot"></span>Apache Airflow</div>
+      <div class="skill-item"><span class="skill-dot"></span>Docker</div>
+    </div>
+
+    <div class="glass skill-cat">
+      <h3>📊 Visualisation</h3>
+      <div class="skill-item"><span class="skill-dot"></span>Matplotlib · Seaborn</div>
+      <div class="skill-item"><span class="skill-dot"></span>Power BI · Tableau</div>
+      <div class="skill-item"><span class="skill-dot"></span>Metabase</div>
+    </div>
+
+    <div class="glass skill-cat">
+      <h3>☁️ Cloud & Infra</h3>
+      <div class="skill-item"><span class="skill-dot"></span>AWS · GCP</div>
+      <div class="skill-item"><span class="skill-dot"></span>Data Warehouse / Data Lake</div>
+      <div class="skill-item"><span class="skill-dot"></span>Git / GitHub</div>
+    </div>
+
+    <div class="glass skill-cat">
+      <h3>🤖 IA & Outils</h3>
+      <div class="skill-item"><span class="skill-dot"></span>IA générative (Claude, GPT)</div>
+      <div class="skill-item"><span class="skill-dot"></span>Prompt Engineering</div>
+      <div class="skill-item"><span class="skill-dot"></span>GitHub Copilot</div>
+    </div>
+
+    <div class="glass skill-cat">
+      <h3>🎨 Autres</h3>
+      <div class="skill-item"><span class="skill-dot"></span>Figma · Adobe XD</div>
+      <div class="skill-item"><span class="skill-dot"></span>Excel (avancé)</div>
+      <div class="skill-item"><span class="skill-dot"></span>UX / Product thinking</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">Parcours</div>
+  <div class="section-title">Expériences professionnelles</div>
+  <p class="section-desc">3+ ans d'expérience dans des environnements produit et digital avec une forte composante data.</p>
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Oct 2022 – Nov 2023</div>
+      <div class="timeline-title">Product Designer</div>
+      <div class="timeline-company">Natixis Interépargne · Paris</div>
+      <ul class="timeline-desc">
+        <li>Exploitation et suivi de KPIs pour orienter les évolutions produit</li>
+        <li>Amélioration des données d'entrée : –30 % d'erreurs sur les formulaires</li>
+        <li>Structuration et fiabilisation des informations de pilotage digital</li>
+        <li>Collaboration avec équipes IT, développeurs et Product Owners</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Jan 2024 – Présent</div>
+      <div class="timeline-title">Designer & Coach Sportif Indépendant</div>
+      <div class="timeline-company">Freelance · Paris</div>
+      <ul class="timeline-desc">
+        <li>Suivi statistique des performances physiques et automatisation de reportings</li>
+        <li>Structuration et analyse de données d'usage pour orienter les décisions</li>
+        <li>Gestion de projets digitaux de bout en bout</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-date">Mar 2019 – Déc 2022</div>
+      <div class="timeline-title">Designer UX/UI</div>
+      <div class="timeline-company">Bird Office / Habiteo · Paris</div>
+      <ul class="timeline-desc">
+        <li>Conception d'interfaces et expériences utilisateurs pour des produits digitaux</li>
+        <li>Analyse des comportements utilisateurs et optimisation des parcours</li>
+        <li>Travail en environnement agile avec des équipes produit et tech</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education">
+  <div class="section-label">Formation</div>
+  <div class="section-title">Parcours académique</div>
+  <div class="edu-grid">
+    <div class="glass edu-card">
+      <div class="edu-year">2026 (en cours)</div>
+      <div class="edu-degree">Data Engineer — RNCP 7 (Bac+5)</div>
+      <div class="edu-school">Liora × École des Mines Paris</div>
+    </div>
+    <div class="glass edu-card">
+      <div class="edu-year">2020 – 2022</div>
+      <div class="edu-degree">Mastère UX/UI Design</div>
+      <div class="edu-school">Paris Ynov Campus</div>
+    </div>
+    <div class="glass edu-card">
+      <div class="edu-year">2017 – 2020</div>
+      <div class="edu-degree">Bachelor Chef de Projet Digital</div>
+      <div class="edu-school">EEMI Paris</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="glass contact-card">
+    <h2>Travaillons ensemble 🚀</h2>
+    <p>Je suis disponible en alternance à partir de septembre 2026.<br />N'hésitez pas à me contacter pour en discuter.</p>
+    <div class="contact-links">
+      <a href="mailto:eliezervanerot.nathan@gmail.com" class="contact-link">
+        <span class="contact-link-icon">📧</span>
+        eliezervanerot.nathan@gmail.com
+      </a>
+      <a href="tel:+33646486446" class="contact-link">
+        <span class="contact-link-icon">📱</span>
+        +33 6 46 48 64 46
+      </a>
+      <a href="https://github.com/PixelNinja971" target="_blank" class="contact-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+        github.com/PixelNinja971
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Conçu par <a href="https://github.com/PixelNinja971">Nathan Eliezer-Vanerot</a> · Data Engineer en formation · Paris 2026</p>
+</footer>
+
+</div>
+</body>
+</html>
